@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta name="referrer" content="strict-origin-when-cross-origin"/>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' https://cdnjs.cloudflare.com; img-src 'self' data: blob:; connect-src 'self' https://api.open-meteo.com;"/>
+  <title>SmartFarm – Farmer's Digital Assistant</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <link rel="stylesheet" href="css/sidebar.css"/>
+  <link rel="stylesheet" href="css/components.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<!-- ═══════════════ LOGIN SCREEN ═══════════════ -->
+<div id="login-screen">
+  <div class="auth-bg">
+    <div class="auth-card">
+      <div class="auth-logo">🌾</div>
+      <h1 class="auth-title">SmartFarm</h1>
+      <p class="auth-sub">Farmer's Digital Assistant</p>
+
+      <!-- Login Form -->
+      <div id="login-form-wrap">
+        <h2 class="form-heading">Welcome Back 👨‍🌾</h2>
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input class="form-input" id="login-phone" type="tel" placeholder="Enter your phone number"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input class="form-input" id="login-pass" type="password" placeholder="Enter password"/>
+        </div>
+        <div id="login-error" class="auth-error"></div>
+        <button class="btn btn-primary btn-full" onclick="handleLogin()">Login</button>
+        <p class="auth-switch">New farmer? <a href="#" onclick="showRegister()">Register here</a></p>
+      </div>
+
+      <!-- Register Form -->
+      <div id="register-form-wrap" style="display:none">
+        <h2 class="form-heading">Join SmartFarm 🌱</h2>
+        <div class="grid-2">
+          <div class="form-group">
+            <label class="form-label">Full Name *</label>
+            <input class="form-input" id="reg-name" type="text" placeholder="Your full name"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone Number *</label>
+            <input class="form-input" id="reg-phone" type="tel" placeholder="10-digit mobile"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input class="form-input" id="reg-pass" type="password" placeholder="Create password"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Village / Town</label>
+            <input class="form-input" id="reg-village" type="text" placeholder="Village name"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">District</label>
+            <input class="form-input" id="reg-district" type="text" placeholder="District"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">State</label>
+            <select class="form-select" id="reg-state">
+              <option value="">Select State</option>
+              <option>Andhra Pradesh</option><option>Assam</option><option>Bihar</option>
+              <option>Chhattisgarh</option><option>Gujarat</option><option>Haryana</option>
+              <option>Himachal Pradesh</option><option>Jharkhand</option><option>Karnataka</option>
+              <option>Kerala</option><option>Madhya Pradesh</option><option>Maharashtra</option>
+              <option>Manipur</option><option>Odisha</option><option>Punjab</option>
+              <option>Rajasthan</option><option>Tamil Nadu</option><option>Telangana</option>
+              <option>Uttar Pradesh</option><option>Uttarakhand</option><option>West Bengal</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Farm Size (acres)</label>
+            <input class="form-input" id="reg-farmsize" type="number" placeholder="e.g. 5"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Primary Crop</label>
+            <select class="form-select" id="reg-crop">
+              <option value="">Select Crop</option>
+              <option>Rice</option><option>Wheat</option><option>Maize</option><option>Cotton</option>
+              <option>Sugarcane</option><option>Tomato</option><option>Potato</option><option>Onion</option>
+              <option>Soybean</option><option>Groundnut</option><option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Farming Experience (years)</label>
+          <input class="form-input" id="reg-exp" type="number" placeholder="Years of experience"/>
+        </div>
+        <div id="reg-error" class="auth-error"></div>
+        <button class="btn btn-primary btn-full" onclick="handleRegister()">Create Account</button>
+        <p class="auth-switch">Already registered? <a href="#" onclick="showLogin()">Login here</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MAIN APP ═══════════════ -->
+<div id="app-wrapper" style="display:none">
+
+  <!-- Hamburger (mobile) -->
+  <button id="hamburger" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i>
+  </button>
+  <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- ── SIDEBAR ── -->
+  <nav id="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-icon">🌾</span>
+      <span class="logo-text">SmartFarm</span>
+    </div>
+    <div class="sidebar-farmer" id="sidebar-farmer-info">
+      <div class="farmer-avatar" id="farmer-avatar">👨‍🌾</div>
+      <div>
+        <div class="farmer-name" id="farmer-name-display">Farmer</div>
+        <div class="farmer-meta" id="farmer-meta-display">-- acres</div>
+      </div>
+    </div>
+
+    <ul class="sidebar-nav" id="sidebar-nav">
+      <li class="nav-section-title">Main</li>
+      <li class="nav-item" data-page="home"        onclick="navigateTo('home')">        <span class="nav-icon">🏠</span><span class="nav-label">Home</span></li>
+      <li class="nav-item" data-page="dashboard"   onclick="navigateTo('dashboard')">   <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span></li>
+
+      <li class="nav-section-title">Crop Management</li>
+      <li class="nav-item" data-page="crop-planner" onclick="navigateTo('crop-planner')"><span class="nav-icon">🌱</span><span class="nav-label">Crop Planner</span></li>
+      <li class="nav-item" data-page="crop-info"   onclick="navigateTo('crop-info')">   <span class="nav-icon">🌾</span><span class="nav-label">Crop Information</span></li>
+
+      <li class="nav-section-title">Field & Resources</li>
+      <li class="nav-item" data-page="irrigation"  onclick="navigateTo('irrigation')">  <span class="nav-icon">💧</span><span class="nav-label">Smart Irrigation</span></li>
+      <li class="nav-item" data-page="weather"     onclick="navigateTo('weather')">     <span class="nav-icon">☁️</span><span class="nav-label">Weather Monitoring</span></li>
+      <li class="nav-item" data-page="soil"        onclick="navigateTo('soil')">        <span class="nav-icon">🌍</span><span class="nav-label">Soil Monitoring</span></li>
+
+      <li class="nav-section-title">Inputs & Protection</li>
+      <li class="nav-item" data-page="fertilizer"  onclick="navigateTo('fertilizer')">  <span class="nav-icon">🧪</span><span class="nav-label">Fertilizer Rec.</span></li>
+      <li class="nav-item" data-page="pest"        onclick="navigateTo('pest')">        <span class="nav-icon">🐛</span><span class="nav-label">Pest &amp; Disease</span></li>
+
+      <li class="nav-section-title">Finance</li>
+      <li class="nav-item" data-page="market"      onclick="navigateTo('market')">      <span class="nav-icon">💰</span><span class="nav-label">Market Prices</span></li>
+      <li class="nav-item" data-page="expense"     onclick="navigateTo('expense')">     <span class="nav-icon">💵</span><span class="nav-label">Expense Management</span></li>
+      <li class="nav-item" data-page="profit"      onclick="navigateTo('profit')">      <span class="nav-icon">📈</span><span class="nav-label">Profit Calculator</span></li>
+
+      <li class="nav-section-title">Farm Operations</li>
+      <li class="nav-item" data-page="farm"        onclick="navigateTo('farm')">        <span class="nav-icon">🚜</span><span class="nav-label">Farm Management</span></li>
+      <li class="nav-item" data-page="reports"     onclick="navigateTo('reports')">     <span class="nav-icon">📊</span><span class="nav-label">Reports &amp; Analytics</span></li>
+      <li class="nav-item" data-page="alerts"      onclick="navigateTo('alerts')">
+        <span class="nav-icon">🔔</span><span class="nav-label">Alerts</span>
+        <span class="notif-badge" id="notif-badge" style="display:none">0</span>
+      </li>
+
+      <li class="nav-section-title">Resources</li>
+      <li class="nav-item" data-page="equipment"   onclick="navigateTo('equipment')">   <span class="nav-icon">🚜</span><span class="nav-label">Equipment</span></li>
+      <li class="nav-item" data-page="schemes"     onclick="navigateTo('schemes')">     <span class="nav-icon">🏛️</span><span class="nav-label">Govt Schemes</span></li>
+      <li class="nav-item" data-page="technology"  onclick="navigateTo('technology')">  <span class="nav-icon">🤖</span><span class="nav-label">Modern Farming Tech</span></li>
+
+      <li class="nav-section-title">Support</li>
+      <li class="nav-item" data-page="contact"     onclick="navigateTo('contact')">     <span class="nav-icon">📞</span><span class="nav-label">Contact Us</span></li>
+      <li class="nav-item" data-page="settings"    onclick="navigateTo('settings')">    <span class="nav-icon">⚙️</span><span class="nav-label">Settings</span></li>
+      <li class="nav-item" onclick="handleLogout()"><span class="nav-icon">🚪</span><span class="nav-label">Logout</span></li>
+    </ul>
+  </nav>
+
+  <!-- ── PAGE CONTENT ── -->
+  <main id="main-content">
+    <div id="page-content"></div>
+  </main>
+</div>
+
+<!-- Global Modal Container -->
+<div id="modal-container"></div>
+
+<!-- Scripts -->
+<script src="js/data.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/pages/home.js"></script>
+<script src="js/pages/dashboard.js"></script>
+<script src="js/pages/crop-planner.js"></script>
+<script src="js/pages/crop-info.js"></script>
+<script src="js/pages/irrigation.js"></script>
+<script src="js/pages/weather.js"></script>
+<script src="js/pages/soil.js"></script>
+<script src="js/pages/fertilizer.js"></script>
+<script src="js/pages/pest.js"></script>
+<script src="js/pages/market.js"></script>
+<script src="js/pages/expense.js"></script>
+<script src="js/pages/profit.js"></script>
+<script src="js/pages/farm.js"></script>
+<script src="js/pages/reports.js"></script>
+<script src="js/pages/alerts.js"></script>
+<script src="js/pages/equipment.js"></script>
+<script src="js/pages/schemes.js"></script>
+<script src="js/pages/technology.js"></script>
+<script src="js/pages/contact.js"></script>
+<script src="js/pages/settings.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
